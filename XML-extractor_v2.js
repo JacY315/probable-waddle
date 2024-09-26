@@ -68,23 +68,53 @@ const zip = new PizZip(content);
 
 // Now, for each extracted letter, generate a DOCX file with the updated first name
 extractedData.forEach(letterData => {
-    console.log(letterData); // Log the data structure to verify keys
+    //console.log(letterData); // Log the data structure to verify keys
 
     // Correct the path to first_name based on the actual structure
-    const firstName = letterData.batch_letter_gen['batch_letter_gen.subscriber_name']['batch_letter_gen.subscriber_name.first_name'];
     const documentId = letterData.documentId;
+    const firstName = letterData.batch_letter_gen['batch_letter_gen.subscriber_name']['batch_letter_gen.subscriber_name.first_name'];
+    const lastName = letterData.batch_letter_gen['batch_letter_gen.subscriber_name']['batch_letter_gen.subscriber_name.last_name'];
+    const groupNumber = letterData.batch_letter_gen['batch_letter_gen.group_number'];
+    const accountNumber = letterData.batch_letter_gen['batch_letter_gen.collective_id'];
+    const memberNumber = letterData.batch_letter_gen['batch_letter_gen.subscriber_id'];
+    const invoiceNumber = letterData.batch_letter_gen['batch_letter_gen.invoice_number'];
 
-    if (!firstName) {
-        console.error(`firstName is undefined for documentId ${documentId}`);
-        return;
-    }
+    const systemDate = letterData.batch_letter_gen['batch_letter_gen.system_date'];
+    const sendAddress1 = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.address_1'];
+    const sendAddress2 = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.address_2'];
+    const sendCity = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.city'];
+    const sendState = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.state'];
+    const sendZip = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.zip'];
+    const returnAddress1 = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.address_1'];
+    const returnAddress2 = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.address_2'];
+    const returnAddress3 = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.address_3'];
+    const returnCity = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.city'];
+    const returnState = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.state'];
+    const returnZip = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.zip'];
 
     // Clone the template for each letter
     const docx = new Docxtemplater(zip.clone());
 
     // Set the data for the placeholder in the template
     docx.setData({
-        firstName: firstName
+        firstName: firstName,
+        lastName: lastName,
+        groupNumber: groupNumber,
+        accountNumber: accountNumber,
+        memberNumber: memberNumber,
+        invoiceNumber: invoiceNumber,
+        systemDate: systemDate,
+        sendAddress1: sendAddress1,
+        sendAddress2: sendAddress2,
+        sendCity: sendCity,
+        sendState: sendState,
+        sendZip: sendZip,
+        returnAddress1: returnAddress1,
+        returnAddress2: returnAddress2,
+        returnAddress3: returnAddress3,
+        returnCity: returnCity,
+        returnState: returnState,
+        returnZip: returnZip
     });
 
     try {
