@@ -40,12 +40,10 @@ fs.writeFileSync('sortedMedicareBatchBills.json', JSON.stringify(extractedData, 
 const content = fs.readFileSync(path.join(assetsFolder, 'CurrentBillTemplate.docx'), 'binary');
 const zip = new PizZip(content);
 
-// Now, for each extracted letter, generate a DOCX file with the updated first name
+// For each extracted letter, generate a DOCX file
 extractedData.forEach(letterData => {
-    // [TEST] Log the data structure to verify keys
-    //console.log(letterData);
 
-    // Correct the path to first_name based on the actual structure
+    // Define path to xml data
     const documentId = letterData.documentId;
     const firstName = letterData.batch_letter_gen['batch_letter_gen.subscriber_name']['batch_letter_gen.subscriber_name.first_name'];
     const lastName = letterData.batch_letter_gen['batch_letter_gen.subscriber_name']['batch_letter_gen.subscriber_name.last_name'];
@@ -64,13 +62,18 @@ extractedData.forEach(letterData => {
     const returnCity = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.city'];
     const returnState = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.state'];
     const returnZip = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.zip'];
-
     const memberFullName = letterData.batch_letter_gen['batch_letter_gen.covered_members']['batch_letter_gen.covered_members.member_full_name'];
+    const planName = letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.plan_name'];
 
-    // Implementation of formatSystemDate
+    const remitAddress1 = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.address_1'];
+    const remitAddress2 = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.address_2'];
+    const remitCity = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.city'];
+    const remitState = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.state'];
+    const remitZip = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.zip'];
+    const remitOCR = letterData.batch_letter_gen['batch_letter_gen.remittance_ocr'];
+
     const systemDate = formatSystemDate(letterData.batch_letter_gen['batch_letter_gen.system_date']);
 
-    // Implementation of formatToMMDDYYYY
     const billingFirstDay = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.first_day_of_billing_cycle']);
     const billingLastDay = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.last_day_of_billing_cycle']);
     const billDueDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.bill_due_date']);
@@ -78,17 +81,25 @@ extractedData.forEach(letterData => {
     const billStartDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.biling_period_start_date']);
     const billEndDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.biling_period_end_date']);
     const coverageEffectiveDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.covered_members']['batch_letter_gen.covered_members.coverage_effective_date']);
+    const coveragePeriodStartDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.coverage_period_start_date']);
+    const coveragePeriodEndDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.coverage_period_end_date']);
 
-    // Implementation of formatToDollar
     const previousAmountDue = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.previous_amount_due']);
     const payments = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.payments']);
     const currentCharges = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.current_charges']);
     const totalDue = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.amount_owed']);
+    const planPrice = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.plan_price']);
+    const planCurrentCharges = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.plan_current_charges']);
+
+    //Placeholders for Payment details
+    // const paymentDetailsItem
+    // const paymentDetailsDate
+    // const paymentDetailsAmount
 
     // Clone the template for each letter
     const docx = new Docxtemplater(zip.clone());
 
-    // Set the data for the placeholder in the template
+    // Associate path with template placeholder
     docx.setData({
         firstName: firstName,
         lastName: lastName,
@@ -112,6 +123,11 @@ extractedData.forEach(letterData => {
 
         memberFullName: memberFullName,
         coverageEffectiveDate: coverageEffectiveDate,
+        planName: planName,
+        cStart: coveragePeriodStartDate,
+        cEnd: coveragePeriodEndDate,
+        planPrice: planPrice,
+        planCurrCharges: planCurrentCharges,
 
         sendAddress1: sendAddress1,
         sendAddress2: sendAddress2,
@@ -123,9 +139,16 @@ extractedData.forEach(letterData => {
         returnAddress3: returnAddress3,
         returnCity: returnCity,
         returnState: returnState,
-        returnZip: returnZip
+        returnZip: returnZip,
+        remitAddress1: remitAddress1,
+        remitAddress2: remitAddress2,
+        remitCity: remitCity,
+        remitState: remitState,
+        remitZip: remitZip,
+        remitOCR: remitOCR
     });
 
+    // try-catch if docx does not render
     try {
         // Render the document
         docx.render();
@@ -134,10 +157,13 @@ extractedData.forEach(letterData => {
         return;
     }
 
-    // Save the updated document with the correct name in the OUT folder
-    // const outputPath = path.join(outFolder, `UpdatedBill_${documentId}.docx`);
-    // const buf = docx.getZip().generate({ type: 'nodebuffer' });
-    // fs.writeFileSync(outputPath, buf);
+    // [TEST] Uncomment to see how xml is parsed (array of objects with document ID as the UID)
+    //console.log(letterData);
+
+    // Save the updated document with the correct name in the TOTRANSLATE folder
+    const outputPath = path.join(outFolder, `UpdatedBill_${documentId}.docx`);
+    const buf = docx.getZip().generate({ type: 'nodebuffer' });
+    fs.writeFileSync(outputPath, buf);
 });
 
 console.log('Documents successfully created in the TOTRANSLATE folder.');
@@ -197,6 +223,7 @@ function formatToMMDDYYYY(dateString) {
     return `${month}/${day}/${year}`;
 }
 
+// Function to convert float to currency
 function formatToDollar(value) {
     // Ensure the value is correctly parsed as a float, even if it's negative
     const numberValue = parseFloat(value);
