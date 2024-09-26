@@ -64,16 +64,13 @@ extractedData.forEach(letterData => {
     const returnZip = letterData.batch_letter_gen['batch_letter_gen.return_address']['batch_letter_gen.return_address.zip'];
     const memberFullName = letterData.batch_letter_gen['batch_letter_gen.covered_members']['batch_letter_gen.covered_members.member_full_name'];
     const planName = letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.plan_name'];
-
     const remitAddress1 = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.address_1'];
     const remitAddress2 = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.address_2'];
     const remitCity = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.city'];
     const remitState = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.state'];
     const remitZip = letterData.batch_letter_gen['batch_letter_gen.remittance_address']['batch_letter_gen.remittance_address.zip'];
     const remitOCR = letterData.batch_letter_gen['batch_letter_gen.remittance_ocr'];
-
     const systemDate = formatSystemDate(letterData.batch_letter_gen['batch_letter_gen.system_date']);
-
     const billingFirstDay = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.first_day_of_billing_cycle']);
     const billingLastDay = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.last_day_of_billing_cycle']);
     const billDueDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.bill_due_date']);
@@ -83,7 +80,6 @@ extractedData.forEach(letterData => {
     const coverageEffectiveDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.covered_members']['batch_letter_gen.covered_members.coverage_effective_date']);
     const coveragePeriodStartDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.coverage_period_start_date']);
     const coveragePeriodEndDate = formatToMMDDYYYY(letterData.batch_letter_gen['batch_letter_gen.plan_name_sequence']['batch_letter_gen.plan_name_sequence.coverage_period_end_date']);
-
     const previousAmountDue = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.previous_amount_due']);
     const payments = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.payments']);
     const currentCharges = formatToDollar(letterData.batch_letter_gen['batch_letter_gen.current_charges']);
@@ -107,7 +103,6 @@ extractedData.forEach(letterData => {
         accountNumber: accountNumber,
         memberNumber: memberNumber,
         invoiceNumber: invoiceNumber,
-
         systemDate: systemDate,
         billingFirstDay: billingFirstDay,
         billingLastDay: billingLastDay,
@@ -115,12 +110,10 @@ extractedData.forEach(letterData => {
         billDate: billDate,
         bDate: billStartDate,
         bDate: billEndDate,
-
         prev: previousAmountDue,
         pay: payments,
         curr: currentCharges,
         due: totalDue,
-
         memberFullName: memberFullName,
         coverageEffectiveDate: coverageEffectiveDate,
         planName: planName,
@@ -128,7 +121,6 @@ extractedData.forEach(letterData => {
         cEnd: coveragePeriodEndDate,
         planPrice: planPrice,
         planCurrCharges: planCurrentCharges,
-
         sendAddress1: sendAddress1,
         sendAddress2: sendAddress2,
         sendCity: sendCity,
