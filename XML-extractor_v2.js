@@ -78,8 +78,6 @@ extractedData.forEach(letterData => {
     const accountNumber = letterData.batch_letter_gen['batch_letter_gen.collective_id'];
     const memberNumber = letterData.batch_letter_gen['batch_letter_gen.subscriber_id'];
     const invoiceNumber = letterData.batch_letter_gen['batch_letter_gen.invoice_number'];
-
-    const systemDate = letterData.batch_letter_gen['batch_letter_gen.system_date'];
     const sendAddress1 = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.address_1'];
     const sendAddress2 = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.address_2'];
     const sendCity = letterData.batch_letter_gen['batch_letter_gen.send_address']['batch_letter_gen.send_address.city'];
@@ -95,6 +93,26 @@ extractedData.forEach(letterData => {
     // Clone the template for each letter
     const docx = new Docxtemplater(zip.clone());
 
+    // Function to format system_date from YYYY-MM-DD to Month DD, YYYY
+    function formatSystemDate(dateString) {
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June", "July",
+            "August", "September", "October", "November", "December"
+        ];
+
+        // Split the date string manually
+        const [year, month, day] = dateString.split('-');
+
+        // Convert the month from 0-indexed (JavaScript Date behavior) to 1-indexed
+        const formattedDate = `${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+
+        return formattedDate;
+    }
+
+    // Inside your code where you're setting systemDate
+    const systemDate = letterData.batch_letter_gen['batch_letter_gen.system_date'];
+    const formattedSystemDate = formatSystemDate(systemDate);
+
     // Set the data for the placeholder in the template
     docx.setData({
         firstName: firstName,
@@ -103,7 +121,7 @@ extractedData.forEach(letterData => {
         accountNumber: accountNumber,
         memberNumber: memberNumber,
         invoiceNumber: invoiceNumber,
-        systemDate: systemDate,
+        systemDate: formattedSystemDate,
         sendAddress1: sendAddress1,
         sendAddress2: sendAddress2,
         sendCity: sendCity,
